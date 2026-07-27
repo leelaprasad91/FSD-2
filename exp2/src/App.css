@@ -1,0 +1,197 @@
+/* Remove default browser spacing */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:white;
+    font-family:Arial, sans-serif;
+}
+
+/* Main Container */
+.container{
+    width:1100px;
+    margin:0 auto;
+    padding:30px;
+    background:blueviolet;
+    border-radius:10px;
+    box-shadow:0 0 10px gray;
+    min-height:100vh;
+}
+
+/* Heading */
+h1{
+    text-align:center;
+    color:white;
+    margin-bottom:10px;
+}
+
+/* Labels */
+label{
+    display:block;
+    font-weight:bold;
+    color:#b8b8b8;
+    text-align:center;
+    margin-bottom:10px;
+    font-size:18px;
+}
+
+/* Dropdown */
+select{
+    width:100%;
+    padding:12px;
+    font-size:16px;
+    margin-bottom:25px;
+    background:#3f3f3f;
+    color:white;
+    border:none;
+    border-radius:5px;
+}
+
+/* Text Area */
+textarea{
+    width:100%;
+    height:170px;
+    padding:12px;
+    font-size:16px;
+    background:#3f3f3f;
+    color:white;
+    border:none;
+    border-radius:5px;
+    resize:none;
+}
+
+/* Character Counter */
+.counter{
+    text-align:center;
+    font-size:18px;
+    font-weight:bold;
+    color:#b8b8b8;
+    margin:20px 0;
+}
+
+/* Buttons */
+button{
+    display:block;
+    margin:20px auto;
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:10px 22px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+button:hover{
+    background:#1d4ed8;
+}
+
+button:disabled{
+    background:gray;
+    cursor:not-allowed;
+}
+
+/* Draft Card */
+.draft{
+    background:#fafafa;
+    border:1px solid #ddd;
+    border-radius:8px;
+    padding:15px;
+    margin-top:15px;
+}
+
+/* Edit Button */
+.edit{
+    background:orange;
+    margin-right:10px;
+}
+
+.edit:hover{
+    background:darkorange;
+}
+
+/* Delete Button */
+.delete{
+    background:red;
+}
+
+.delete:hover{
+    background:darkred;
+}
+
+/* Horizontal Line */
+hr{
+    margin:30px 0;
+}
+
+/* Saved Drafts Heading */
+h2{
+    text-align:center;
+    color:white;
+    margin-bottom:15px;
+}
+
+/* Paragraphs */
+p{
+    text-align:center;
+}
+
+/* Draft card meta row */
+.draft-meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+}
+
+.badge{
+    background:#2563eb;
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+    padding:3px 10px;
+    border-radius:999px;
+}
+
+.render-count{
+    font-size:12px;
+    color:#888;
+}
+
+/* Analytics */
+.analytics{
+    background:#fafafa;
+    border:1px solid #ddd;
+    border-radius:8px;
+    padding:15px;
+    margin-top:15px;
+}
+
+.analytics h2{
+    color:#111;
+}
+
+.analytics p, .analytics li{
+    text-align:left;
+    color:#333;
+}
+
+.analytics .hint{
+    font-size:12px;
+    color:#888;
+    margin:10px 0;
+}
+
+.analytics ul{
+    list-style:none;
+    margin-top:10px;
+}
+
+/* Error state */
+.error-text{
+    color:#ffdddd;
+    font-weight:bold;
+}
