@@ -1,5 +1,5 @@
 {
-  "name": "rbac-auth-app",
+  "name": "rbac-auth-demo",
   "private": true,
   "version": "1.0.0",
   "type": "module",

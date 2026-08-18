@@ -1,57 +1,56 @@
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext.jsx";
-import { DEMO_ACCOUNTS } from "../api/mockBackend.js";
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { USERS } from '../services/authService';
 
 export default function Login() {
-  const { login, authError, setAuthError } = useAuth();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { login, sessionMessage, setSessionMessage } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const from = location.state?.from?.pathname || "/dashboard";
+  const from = location.state?.from?.pathname || '/';
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
-    setAuthError("");
+    setError(null);
     setLoading(true);
     try {
       await login(username, password);
+      setSessionMessage(null);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Login failed");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   }
 
-  function fillDemo(account) {
-    setUsername(account.username);
-    setPassword(account.password);
+  function quickFill(u) {
+    setUsername(u.username);
+    setPassword(u.password);
+    setError(null);
   }
 
   return (
-    <div className="auth-page">
-      <div className="card">
-        <h1>Sign in</h1>
-        <p className="subtitle">Experiment 3 — Role-Based Authentication</p>
+    <div className="auth-shell">
+      <div className="auth-card">
+        <div className="auth-header">
+          <span className="brand-mark">RBAC</span>
+          <h1>Role-Based Authentication</h1>
+          <p>JWT login · route protection · permission-aware UI</p>
+        </div>
 
-        {authError && <div className="alert alert-warning">{authError}</div>}
-        {error && <div className="alert alert-error">{error}</div>}
+        {sessionMessage && <div className="banner banner-warn">{sessionMessage}</div>}
+        {error && <div className="banner banner-error">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="form">
+        <form onSubmit={handleSubmit} className="auth-form">
           <label>
             Username
-            <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="admin / editor / viewer"
-              required
-            />
+            <input value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" required />
           </label>
           <label>
             Password
@@ -59,24 +58,21 @@ export default function Login() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
               required
             />
           </label>
-          <button type="submit" disabled={loading}>
-            {loading ? "Signing in..." : "Sign in"}
+          <button className="btn btn-primary" type="submit" disabled={loading}>
+            {loading ? 'Verifying credentials…' : 'Log in'}
           </button>
         </form>
 
         <div className="demo-accounts">
-          <p className="subtitle">Demo accounts (click to autofill):</p>
-          {DEMO_ACCOUNTS.map((acc) => (
-            <button
-              key={acc.username}
-              type="button"
-              className="chip"
-              onClick={() => fillDemo(acc)}
-            >
-              {acc.role}: {acc.username} / {acc.password}
+          <p className="demo-accounts-label">Demo accounts — click to fill</p>
+          {USERS.map((u) => (
+            <button key={u.username} type="button" className="demo-account" onClick={() => quickFill(u)}>
+              <span className={`role-badge role-${u.role}`}>{u.role}</span>
+              <span>{u.username} / {u.password}</span>
             </button>
           ))}
         </div>

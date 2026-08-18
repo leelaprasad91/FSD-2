@@ -1,73 +1,79 @@
 # Experiment 3 — Role-Based Authentication & Route Protection
 
-React + Vite frontend implementing JWT-simulated authentication, RBAC,
-protected routing, Axios interceptors, and token refresh — matching every
-requirement in the Unit 1 / Experiment 3 lab sheet.
-
-## Why there's no real backend
-
-The lab sheet is a frontend architecture exercise (JWT storage, interceptors,
-protected routes, conditional rendering). To keep this **runnable with zero
-external setup** — no database, no server process, no ports to configure —
-`src/api/mockBackend.js` simulates login/refresh/protected-data endpoints,
-and `src/api/axiosInstance.js` wires them through a **real axios instance**
-via a custom adapter, so the actual `axios.interceptors.request.use(...)`
-and `axios.interceptors.response.use(...)` calls from the PDF are genuinely
-exercised — they just route to the mock instead of the network. Swap the
-adapter for a real backend later without touching any component code.
+A fully working React app (Vite + React Router + Axios) implementing every
+piece from the brief: JWT-style auth, RBAC, protected routes, Axios
+interceptors, token refresh, and permission-driven UI. There's no real
+backend — a custom Axios adapter (`src/services/api.js`) acts as one, so
+every button performs a real (in-memory) create/edit/delete instead of just
+toggling visibility.
 
 ## Run it
 
 ```bash
 npm install
-npm run dev       # http://localhost:5173
+npm run dev
 ```
 
-Or build for production:
+Open the printed localhost URL. Log in with one of the three seeded
+accounts (buttons on the login screen fill them in for you):
+
+| Username | Password    | Role   | Can do                          |
+|----------|-------------|--------|----------------------------------|
+| admin    | admin123    | admin  | create, edit, delete, manage users, view Admin Panel |
+| editor   | editor123   | editor | create, edit                     |
+| viewer   | viewer123   | viewer | read only                        |
+
+## Where each part of the brief lives
+
+- **JWT structure & generation** — `src/services/fakeJwt.js`. Builds a real
+  `HEADER.PAYLOAD.SIGNATURE` token (base64url), with `decodeToken`,
+  `isTokenExpired`, `secondsUntilExpiry`. The dashboard's "Live token
+  inspector" panel shows the decoded header/payload updating in real time.
+- **Auth flow (login → issue token → store → attach to requests)** —
+  `src/services/authService.js` issues access + refresh tokens;
+  `src/context/AuthContext.jsx` holds them in React state and exposes
+  `login`/`logout`.
+- **Axios interceptors** — `src/services/api.js`. Request interceptor
+  attaches `Authorization: Bearer <token>` to every call. Response
+  interceptor catches `401`, calls the refresh endpoint, retries the
+  original request once, and force-logs-out if the refresh token is also
+  dead.
+- **Token expiry & refresh** — access tokens are set to expire in 25s
+  (on purpose, so you can watch it happen instead of waiting). The navbar
+  countdown pill turns red near expiry; when it hits 0, the next API call
+  gets a `401`, the interceptor refreshes silently, and the request
+  succeeds — logged live in the activity panel.
+- **RBAC** — `src/services/permissions.js` is the single permission map
+  (`admin`: create/edit/delete/publish/manage_users, `editor`:
+  create/edit, `viewer`: read). Enforced in **two** places, matching
+  defense-in-depth: client-side (buttons only render if `hasPermission`
+  passes) and server-side in the mock adapter (rejects with `403` even if
+  someone forged a request).
+- **Protected routes** — `src/components/ProtectedRoute.jsx` redirects to
+  `/login` if unauthenticated, or `/unauthorized` if authenticated but
+  missing a required permission (see `/admin`, gated on `manage_users`).
+- **Conditional rendering by role** — Dashboard buttons (Create/Edit/
+  Delete) and the "Admin Panel" nav link only render for roles that hold
+  the relevant permission.
+
+## Try this to see it all work together
+
+1. Log in as **viewer** — no create/edit/delete buttons, no Admin Panel
+   link; typing `/admin` in the URL bounces you to "403 — Not permitted".
+2. Log in as **editor** — Create and Edit appear, Delete doesn't. Try
+   deleting via a forged request (edit the network call in devtools) and
+   the mock backend still rejects it with 403 — RBAC isn't just hidden
+   buttons.
+3. Log in as **admin** — full CRUD, plus the Admin Panel listing all
+   seeded users and their roles.
+4. Stay logged in and idle for ~25s, then click anything that hits the
+   API — watch the activity log show the 401, the silent refresh, and the
+   automatic retry succeeding.
+
+## Build for submission
+
 ```bash
 npm run build
-npm run preview
 ```
 
-## Demo accounts
-
-| Username | Password    | Role   |
-|----------|-------------|--------|
-| admin    | admin123    | admin  |
-| editor   | editor123   | editor |
-| viewer   | viewer123   | viewer |
-
-(Also shown as clickable autofill chips on the login page.)
-
-## What maps to what (PDF → code)
-
-| PDF section | File |
-|---|---|
-| JWT structure, decode payload | `src/auth/jwt.js` |
-| Token storage (localStorage) | `src/auth/AuthContext.jsx` |
-| Axios interceptors (attach token) | `src/api/axiosInstance.js` — request interceptor |
-| Token expiry + refresh mechanism | `src/api/axiosInstance.js` — response interceptor, `mockBackend.js` |
-| RBAC permissions map | `src/rbac/permissions.js` |
-| Protected routes | `src/routes/ProtectedRoute.jsx` |
-| Conditional rendering by role | `src/pages/Dashboard.jsx`, `EditorPanel.jsx` |
-| Secure frontend architecture flow | `src/App.jsx` (route tree), `AuthContext.jsx` |
-
-## Trying the token refresh flow (Assignment 5)
-
-1. Log in as any user.
-2. Access tokens expire after **45 seconds** (see `ACCESS_TOKEN_TTL_SECONDS`
-   in `mockBackend.js`).
-3. Wait 45+ seconds on the Dashboard, then click **"Call protected
-   endpoint"**.
-4. Watch it succeed anyway: the response interceptor caught the 401,
-   silently called `/refresh`, stored the new access token, and retried the
-   original request — no visible error, no re-login.
-
-## Trying RBAC (Assignments 3 & 4)
-
-- Log in as `viewer` → the "Editor Area" and "Admin Panel" links don't even
-  render (conditional rendering), and manually navigating to `/admin` or
-  `/editor` redirects to `/unauthorized` (route guard).
-- Log in as `editor` → can reach `/editor` but not `/admin`.
-- Log in as `admin` → full access, including the "Delete Post" button that
-  only renders for `role === "admin"`.
+Outputs a production bundle to `dist/`.
